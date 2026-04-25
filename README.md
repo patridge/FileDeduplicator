@@ -19,10 +19,10 @@ Scan directories for duplicate files, with configurable comparison that can igno
 Primary command. Scans one or more directories for duplicate files with an interactive results browser.
 
 ```shell
-deduper find-duplicates --path /path/to/scan
-deduper find-duplicates --path /path1 --path /path2 --min-size 500MB
-deduper find-duplicates --path /path/to/scan --allow-metadata-diffs
-deduper find-duplicates --path /path/to/scan --exclude /path/to/scan/skip-this
+FileDeduplicator find-duplicates --path /path/to/scan
+FileDeduplicator find-duplicates --path /path1 --path /path2 --min-size 500MB
+FileDeduplicator find-duplicates --path /path/to/scan --allow-metadata-diffs
+FileDeduplicator find-duplicates --path /path/to/scan --exclude /path/to/scan/skip-this
 ```
 
 Options:
@@ -45,5 +45,5 @@ Results browser features:
 Compare two specific files for size and hash match.
 
 ```shell
-deduper compare ./file1.txt ./file2.txt
+FileDeduplicator compare ./file1.txt ./file2.txt
 ```
