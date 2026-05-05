@@ -66,12 +66,12 @@ public static class DuplicateResultsViewer
                     if (pct < 0)
                     {
                         scanProgress = -1;
-                        scanStatusText = message.Length > 80 ? message[..77] + "..." : message;
+                        scanStatusText = TruncateMiddle(message, 80);
                     }
                     else
                     {
                         scanProgress = pct;
-                        scanStatusText = $"Hashing: {ShortenPath(message, 60)}";
+                        scanStatusText = TruncateMiddle(message, 80);
                     }
                 },
                 onFileSkipped: (path, error) =>
@@ -538,5 +538,19 @@ public static class DuplicateResultsViewer
         }
         var dir = Path.GetDirectoryName(filePath) ?? "";
         return dir[..Math.Min(remaining, dir.Length)] + "/..." + Path.DirectorySeparatorChar + fileName;
+    }
+
+    private static string TruncateMiddle(string text, int maxLength)
+    {
+        if (string.IsNullOrEmpty(text) || text.Length <= maxLength)
+        {
+            return text;
+        }
+
+        const string ellipsis = "...";
+        int available = maxLength - ellipsis.Length;
+        int keepStart = (available + 1) / 2;
+        int keepEnd = available / 2;
+        return text[..keepStart] + ellipsis + text[^keepEnd..];
     }
 }

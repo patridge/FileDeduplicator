@@ -121,6 +121,34 @@ namespace FileDeduplicator.Common
             }
             onStatus?.Invoke($"Found {candidates.Count} file(s) at or above {FormatFileSize(minSizeBytes)}.");
 
+            // When caching is enabled, hash ALL candidates so future scans benefit from cached data
+            if (HashCache != null)
+            {
+                onStatus?.Invoke($"Hashing {candidates.Count} file(s)...");
+                int cachedCount = 0;
+                foreach (var (filePath, fileInfo) in candidates)
+                {
+                    cachedCount++;
+                    double pct = (double)cachedCount / candidates.Count * 100;
+                    onProgress?.Invoke(pct, $"Hashing [{cachedCount}/{candidates.Count}] {filePath}");
+
+                    try
+                    {
+                        HashCache.GetOrComputeHash(filePath);
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                    {
+                        // Skip files that can't be hashed
+                    }
+
+                    if (cachedCount % 100 == 0)
+                    {
+                        HashCache.Save();
+                    }
+                }
+                HashCache.Save();
+            }
+
             // Phase 2: Group by file size — only files sharing a size can be duplicates
             var sizeGroups = candidates
                 .GroupBy(c => c.Info.Length)
@@ -137,7 +165,7 @@ namespace FileDeduplicator.Common
             {
                 processedCount++;
                 double pct = (double)processedCount / filesToProcess.Count * 100;
-                onProgress?.Invoke(pct, filePath);
+                onProgress?.Invoke(pct, $"Hashing [{processedCount}/{filesToProcess.Count}] {filePath}");
 
                 try
                 {
@@ -154,6 +182,12 @@ namespace FileDeduplicator.Common
                         Created = SafeGetTimestamp(() => fileInfo.CreationTimeUtc),
                         LastAccessed = SafeGetTimestamp(() => fileInfo.LastAccessTimeUtc),
                     };
+
+                    // Periodically save cache to avoid losing work if interrupted
+                    if (HashCache != null && processedCount % 100 == 0)
+                    {
+                        HashCache.Save();
+                    }
                 }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                 {
@@ -161,6 +195,9 @@ namespace FileDeduplicator.Common
                     onStatus?.Invoke($"Skipping inaccessible file: {filePath}");
                 }
             }
+
+            // Save cache after all hashing is complete
+            HashCache?.Save();
 
             // Phase 4: Group duplicates
             if (comparers is { Length: > 0 })
