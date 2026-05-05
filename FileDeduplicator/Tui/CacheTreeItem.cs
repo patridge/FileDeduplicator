@@ -45,12 +45,20 @@ public sealed class CacheTreeItem : IListWidgetItem
         if (IsDirectory)
         {
             var arrow = IsExpanded ? "▼ " : "▶ ";
-            var dirName = Path.GetFileName(FullPath.TrimEnd(Path.DirectorySeparatorChar));
-            if (string.IsNullOrEmpty(dirName))
+            string dirName;
+            if (Depth == 0)
             {
                 dirName = FullPath;
             }
-            dirName += Path.DirectorySeparatorChar;
+            else
+            {
+                dirName = Path.GetFileName(FullPath.TrimEnd(Path.DirectorySeparatorChar));
+                if (string.IsNullOrEmpty(dirName))
+                {
+                    dirName = FullPath;
+                }
+                dirName += Path.DirectorySeparatorChar;
+            }
 
             text.Append(arrow, new Style(Color.Grey));
             text.Append(dirName, isHighlighted ? new Style(Color.Yellow) : new Style(Color.Blue));
