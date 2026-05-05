@@ -34,11 +34,11 @@ Options:
 
 Results browser features:
 
-* Paged list of duplicate groups, sorted by size (default) or path
-* Toggle sort order between size and path
+* Scrollable list of duplicate groups, sorted by size (default) or path
+* Toggle sort order between size and path using the <kbd>S<kbd> shortcut
 * Drill into a group to see matched files with filename, size, and directory
 * Open a file's location in Finder/Explorer
-* Refresh a match group to re-verify files (removes missing/changed files, drops the group if no duplicates remain)
+* Refresh a match group to re-verify files (removes missing/changed files, drops the group if no duplicates remain) using the <kbd>R<kbd> shortcut
 
 ### `compare`
 
