@@ -8,6 +8,7 @@ namespace FileDeduplicator.Common
     public class FileScanner
     {
         public IFileComparer? Comparer { get; set; }
+        public FileHashCache? HashCache { get; set; }
 
         public FileScanner() { }
         public FileScanner(IFileComparer comparer)
@@ -36,7 +37,9 @@ namespace FileDeduplicator.Common
                 try
                 {
                     var fileInfo = new FileInfo(filePath);
-                    var hashBytes = FileHelpers.GetFileSha256(filePath);
+                    var hashBytes = HashCache != null
+                        ? HashCache.GetOrComputeHash(filePath)
+                        : FileHelpers.GetFileSha256(filePath);
                     fileDetailsList.Add(new FileDetails
                     {
                         DetailsRetrieved = DateTime.UtcNow,
@@ -138,7 +141,9 @@ namespace FileDeduplicator.Common
 
                 try
                 {
-                    var hashBytes = FileHelpers.GetFileSha256(filePath);
+                    var hashBytes = HashCache != null
+                        ? HashCache.GetOrComputeHash(filePath)
+                        : FileHelpers.GetFileSha256(filePath);
                     fileDetailsByPath[filePath] = new FileDetails
                     {
                         DetailsRetrieved = DateTime.UtcNow,

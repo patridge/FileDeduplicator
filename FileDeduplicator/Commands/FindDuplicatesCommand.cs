@@ -57,6 +57,11 @@ public sealed class FindDuplicatesCommand : Command<FindDuplicatesCommand.Settin
         [Description("Exclude common system-generated files (e.g., .DS_Store, Thumbs.db, desktop.ini).")]
         [DefaultValue(false)]
         public bool ExcludeSystemFiles { get; set; }
+
+        [CommandOption("--use-cache")]
+        [Description("Cache file hashes in app data to speed up future scans. Stale entries are automatically refreshed when file dates change.")]
+        [DefaultValue(false)]
+        public bool UseCache { get; set; }
     }
 
     protected override int Execute(CommandContext context, Settings settings, CancellationToken cancellationToken)
@@ -118,6 +123,15 @@ public sealed class FindDuplicatesCommand : Command<FindDuplicatesCommand.Settin
             ? [new AudioFileComparer(), new ImageFileComparer(), new BinaryFileComparer { IgnoreMetadata = true }]
             : null;
 
+        FileHashCache? cache = null;
+        if (settings.UseCache)
+        {
+            cache = new FileHashCache();
+            scanner.HashCache = cache;
+            AnsiConsole.MarkupLine($"[blue]Using hash cache[/] ({Markup.Escape(FileHashCache.GetDefaultCacheFilePath())})");
+            AnsiConsole.WriteLine();
+        }
+
         DuplicateResultsViewer.ShowWithScan(
             scanner,
             paths,
@@ -126,6 +140,8 @@ public sealed class FindDuplicatesCommand : Command<FindDuplicatesCommand.Settin
             excludePaths,
             excludeExtensions,
             excludeFileNames);
+
+        cache?.Save();
 
         return 0;
     }
