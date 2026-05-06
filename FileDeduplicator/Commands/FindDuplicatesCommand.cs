@@ -139,7 +139,24 @@ public sealed class FindDuplicatesCommand : Command<FindDuplicatesCommand.Settin
             comparers,
             excludePaths,
             excludeExtensions,
-            excludeFileNames);
+            excludeFileNames,
+            onExport: (duplicateGroups, skippedFiles) =>
+            {
+                var report = ScanReport.Create(
+                    paths,
+                    settings.MinSizeBytes,
+                    settings.AllowMetadataDiffs,
+                    settings.UseCache,
+                    excludePaths,
+                    excludeExtensions,
+                    excludeFileNames,
+                    duplicateGroups,
+                    skippedFiles);
+                var exportPath = Path.GetFullPath(
+                    $"scan-report-{DateTime.Now:yyyyMMdd-HHmmss}.json");
+                File.WriteAllText(exportPath, report.ToJson());
+                return exportPath;
+            });
 
         cache?.Save();
 

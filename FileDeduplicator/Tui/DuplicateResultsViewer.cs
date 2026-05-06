@@ -38,7 +38,8 @@ public static class DuplicateResultsViewer
         IFileComparer[]? comparers,
         string[] excludePaths,
         string[] excludeExtensions,
-        string[] excludeFileNames)
+        string[] excludeFileNames,
+        Func<List<(string Key, List<FileDetails> Files)>, List<(string Path, string Error)>, string>? onExport = null)
     {
         var duplicateGroups = new List<(string Key, List<FileDetails> Files)>();
         var skippedFiles = new List<(string Path, string Error)>();
@@ -101,7 +102,8 @@ public static class DuplicateResultsViewer
             getScanComplete: () => scanComplete,
             getScanProgress: () => scanProgress,
             getScanStatus: () => scanStatusText,
-            groupsLock: groupsLock);
+            groupsLock: groupsLock,
+            onExport: onExport);
     }
 
     private static void RunViewer(
@@ -111,7 +113,8 @@ public static class DuplicateResultsViewer
         Func<bool>? getScanComplete = null,
         Func<double>? getScanProgress = null,
         Func<string>? getScanStatus = null,
-        object? groupsLock = null)
+        object? groupsLock = null,
+        Func<List<(string Key, List<FileDetails> Files)>, List<(string Path, string Error)>, string>? onExport = null)
     {
         Console.OutputEncoding = Encoding.Unicode;
         using var terminal = Terminal.Create();
@@ -330,8 +333,8 @@ public static class DuplicateResultsViewer
                 var help = mode switch
                 {
                     ViewMode.Scanning => "[bold]\u2191\u2193[/] Navigate  [bold]Enter[/] View Files  [bold]Q[/] Quit",
-                    ViewMode.GroupList => "[bold]\u2191\u2193[/] Navigate  [bold]Enter[/] View Files  [bold]S[/] Sort  [bold]Q[/] Quit",
-                    ViewMode.FileDetail => "[bold]\u2191\u2193[/] Navigate  [bold]Enter[/] Open Location  [bold]R[/] Refresh  [bold]Esc[/] Back  [bold]Q[/] Quit",
+                    ViewMode.GroupList => "[bold]\u2191\u2193[/] Navigate  [bold]Enter[/] View Files  [bold]S[/] Sort  [bold]E[/] Export  [bold]Q[/] Quit",
+                    ViewMode.FileDetail => "[bold]\u2191\u2193[/] Navigate  [bold]Enter[/] Open Location  [bold]R[/] Refresh  [bold]E[/] Export  [bold]Esc[/] Back  [bold]Q[/] Quit",
                     _ => "",
                 };
                 if (statusMessage != null)
@@ -401,6 +404,20 @@ public static class DuplicateResultsViewer
                         sortOrder = sortOrder == SortOrder.Size ? SortOrder.Path : SortOrder.Size;
                         RebuildGroupList(groupList, groupItems, duplicateGroups, sortOrder);
                         SetStatus(ref statusMessage, ref statusExpiry, $"Sorted by {(sortOrder == SortOrder.Size ? "size" : "path")}");
+                    }
+                    break;
+                case ConsoleKey.E:
+                    if ((mode == ViewMode.GroupList || mode == ViewMode.FileDetail) && onExport != null && duplicateGroups.Count > 0)
+                    {
+                        try
+                        {
+                            var exportedPath = onExport(duplicateGroups, skippedFiles);
+                            SetStatus(ref statusMessage, ref statusExpiry, $"Exported to {exportedPath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            SetStatus(ref statusMessage, ref statusExpiry, $"Export failed: {ex.Message}");
+                        }
                     }
                     break;
                 case ConsoleKey.R:
