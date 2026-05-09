@@ -61,19 +61,19 @@ public static class DuplicateResultsViewer
                 excludeFileNames: excludeFileNames,
                 onStatus: message =>
                 {
-                    scanStatusText = TruncateMiddle(message, 80);
+                    scanStatusText = TruncateMiddle(message, Console.WindowWidth);
                 },
                 onProgress: (pct, message) =>
                 {
                     if (pct < 0)
                     {
                         scanProgress = -1;
-                        scanStatusText = message.Length > 80 ? message[..77] + "..." : message;
+                        scanStatusText = TruncateMiddle(message, Console.WindowWidth);
                     }
                     else
                     {
                         scanProgress = pct;
-                        scanStatusText = TruncateMiddle(message, 80);
+                        scanStatusText = TruncateMiddle(message, Console.WindowWidth);
                     }
                 },
                 onFileSkipped: (path, error) =>
