@@ -3,6 +3,11 @@ using System.Text.Json.Serialization;
 
 namespace FileDeduplicator.Common;
 
+[JsonSerializable(typeof(ScanReport))]
+internal partial class ScanReportJsonContext : JsonSerializerContext
+{
+}
+
 public class ScanReport
 {
     [JsonPropertyName("version")]
@@ -85,10 +90,10 @@ public class ScanReport
 
     public string ToJson()
     {
-        return JsonSerializer.Serialize(this, new JsonSerializerOptions
+        return JsonSerializer.Serialize(this, new ScanReportJsonContext(new JsonSerializerOptions
         {
             WriteIndented = true,
-        });
+        }).ScanReport);
     }
 }
 
