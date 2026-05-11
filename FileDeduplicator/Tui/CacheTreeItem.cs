@@ -64,7 +64,7 @@ public sealed class CacheTreeItem : IListWidgetItem
             text.Append(dirName, isHighlighted ? new Style(Color.DarkOrange) : new Style(Color.Blue));
 
             var staleInfo = StaleCount > 0 ? $", {StaleCount} stale" : "";
-            text.Append($"  ({FileCount} files, {FormatFileSize(TotalSize)}{staleInfo})", new Style(Color.Grey));
+            text.Append($"  ({FileCount} files, {FileHelpers.FormatFileSize(TotalSize)}{staleInfo})", new Style(Color.Grey));
         }
         else if (Entry != null)
         {
@@ -82,23 +82,10 @@ public sealed class CacheTreeItem : IListWidgetItem
             var hashShort = Entry.Sha256Hash.Length >= 12
                 ? Entry.Sha256Hash[..6] + "\u2026" + Entry.Sha256Hash[^6..]
                 : Entry.Sha256Hash;
-            text.Append($"  {FormatFileSize(Entry.FileSize)}  {hashShort}  cached {FormatAge(Entry.CachedAt)}", new Style(Color.Grey));
+            text.Append($"  {FileHelpers.FormatFileSize(Entry.FileSize)}  {hashShort}  cached {FormatAge(Entry.CachedAt)}", new Style(Color.Grey));
         }
 
         return text;
-    }
-
-    private static string FormatFileSize(long bytes)
-    {
-        string[] suffixes = ["B", "KB", "MB", "GB", "TB"];
-        double size = bytes;
-        int suffixIndex = 0;
-        while (size >= 1024 && suffixIndex < suffixes.Length - 1)
-        {
-            size /= 1024;
-            suffixIndex++;
-        }
-        return $"{size:0.##} {suffixes[suffixIndex]}";
     }
 
     private static string FormatAge(DateTime cachedAtUtc)

@@ -21,7 +21,7 @@ public sealed class DuplicateGroupListItem : IListWidgetItem
     {
         var text = new Text();
         text.Append(GetDisplayName(), isSelected ? new Style(Color.DarkOrange) : (Style?)null);
-        text.Append($"  ({FormatFileSize(Files[0].FileSize)}, {Files.Count} files)", new Style(Color.Grey));
+        text.Append($"  ({FileHelpers.FormatFileSize(Files[0].FileSize)}, {Files.Count} files)", new Style(Color.Grey));
         text.Append($"  [{ShortenHash(Key)}]", new Style(Color.Grey));
         return text;
     }
@@ -41,19 +41,6 @@ public sealed class DuplicateGroupListItem : IListWidgetItem
         }
 
         return "(multiple files)";
-    }
-
-    private static string FormatFileSize(long bytes)
-    {
-        string[] suffixes = ["B", "KB", "MB", "GB", "TB"];
-        double size = bytes;
-        int suffixIndex = 0;
-        while (size >= 1024 && suffixIndex < suffixes.Length - 1)
-        {
-            size /= 1024;
-            suffixIndex++;
-        }
-        return $"{size:0.##} {suffixes[suffixIndex]}";
     }
 
     private static string ShortenHash(string hash)

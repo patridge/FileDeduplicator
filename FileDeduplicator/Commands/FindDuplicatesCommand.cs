@@ -110,7 +110,7 @@ public sealed class FindDuplicatesCommand : Command<FindDuplicatesCommand.Settin
         }
         if (settings.MinSizeBytes > 0)
         {
-            AnsiConsole.MarkupLine($"Minimum file size: [blue]{FormatFileSize(settings.MinSizeBytes)}[/]");
+            AnsiConsole.MarkupLine($"Minimum file size: [blue]{FileHelpers.FormatFileSize(settings.MinSizeBytes)}[/]");
         }
         if (settings.AllowMetadataDiffs)
         {
@@ -163,18 +163,6 @@ public sealed class FindDuplicatesCommand : Command<FindDuplicatesCommand.Settin
         return 0;
     }
 
-    private static string FormatFileSize(long bytes)
-    {
-        string[] suffixes = ["B", "KB", "MB", "GB", "TB"];
-        double size = bytes;
-        int suffixIndex = 0;
-        while (size >= 1024 && suffixIndex < suffixes.Length - 1)
-        {
-            size /= 1024;
-            suffixIndex++;
-        }
-        return $"{size:0.##} {suffixes[suffixIndex]}";
-    }
 }
 
 /// <summary>

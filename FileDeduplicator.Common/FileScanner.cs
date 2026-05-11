@@ -121,7 +121,7 @@ namespace FileDeduplicator.Common
             {
                 onStatus?.Invoke($"Skipped {skippedCount} inaccessible file(s).");
             }
-            onStatus?.Invoke($"Found {candidates.Count} file(s) at or above {FormatFileSize(minSizeBytes)}.");
+            onStatus?.Invoke($"Found {candidates.Count} file(s) at or above {FileHelpers.FormatFileSize(minSizeBytes)}.");
 
             // When caching is enabled, hash ALL candidates so future scans benefit from cached data
             if (HashCache != null)
@@ -319,19 +319,6 @@ namespace FileDeduplicator.Common
                     // Skip inaccessible subdirectories
                 }
             }
-        }
-
-        private static string FormatFileSize(long bytes)
-        {
-            string[] suffixes = ["B", "KB", "MB", "GB", "TB"];
-            double size = bytes;
-            int suffixIndex = 0;
-            while (size >= 1024 && suffixIndex < suffixes.Length - 1)
-            {
-                size /= 1024;
-                suffixIndex++;
-            }
-            return $"{size:0.##} {suffixes[suffixIndex]}";
         }
 
         public bool AreFilesEquivalent(string filePath1, string filePath2)

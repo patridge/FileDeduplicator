@@ -299,7 +299,7 @@ public static class DuplicateResultsViewer
                     var sortLabel = sortOrder == SortOrder.Size ? "size" : "path";
                     var skippedSuffix = skippedFiles.Count > 0 ? $" | {skippedFiles.Count} skipped" : "";
                     var totalWastedBytes = duplicateGroups.Sum(g => g.Files[0].FileSize * (g.Files.Count - 1));
-                    var summary = $"[green]{duplicateGroups.Count} group(s) | Potential Savings: {FormatFileSize(totalWastedBytes)} | Sort: {sortLabel}{skippedSuffix}[/]";
+                    var summary = $"[green]{duplicateGroups.Count} group(s) | Potential Savings: {FileHelpers.FormatFileSize(totalWastedBytes)} | Sort: {sortLabel}{skippedSuffix}[/]";
                     ctx.Render(
                         Paragraph.FromMarkup(summary, null).Centered(),
                         summaryArea);
@@ -617,19 +617,6 @@ public static class DuplicateResultsViewer
         {
             // In TUI mode, file location opening is best-effort
         }
-    }
-
-    private static string FormatFileSize(long bytes)
-    {
-        string[] suffixes = ["B", "KB", "MB", "GB", "TB"];
-        double size = bytes;
-        int suffixIndex = 0;
-        while (size >= 1024 && suffixIndex < suffixes.Length - 1)
-        {
-            size /= 1024;
-            suffixIndex++;
-        }
-        return $"{size:0.##} {suffixes[suffixIndex]}";
     }
 
     private static string EscapeMarkup(string text)
